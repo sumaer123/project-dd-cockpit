@@ -35,7 +35,7 @@ const QLABEL=Object.fromEntries([...ALLQ.map(q=>[q.slice(-2),q]),['ALL','ALL']])
 const FY_BOUNDS=[D.qbounds[ALLQ[0]][0],D.qbounds[ALLQ[3]][1]];
 const CURQ=D.meta.curFQ, CQ=CURQ.slice(-2), PQ=(D.meta.prevFQ||'').slice(-2)||'prior Q';
 let state={module:'consumption',level:'territory',ae:null,acctId:null,q:D.meta.curFQ,week:'all',fcSort:'forecast',acctSort:'forecast',oppFilter:'All',acctTab:(window.DD_DEEPDIVE_URL?'deep':'classic'),partnerSel:null,robWeek:(D.rob&&D.rob.curFriday)||'',robTab:'cur',
-  // Hygiene keeps its OWN selected AE: its roster is keyed by id ('ankur'), while
+  // Hygiene keeps its OWN selected AE: its roster is keyed by a short roster id, while
   // state.ae holds a Project DD AE name and is used to look up accounts. Sharing
   // one field would send acctsByAE[] a key that can never match.
   hygAe:null,hygWow:'chart',hygState:'',hygSurface:'uc',

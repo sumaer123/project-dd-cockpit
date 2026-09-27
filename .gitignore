@@ -30,3 +30,5 @@ __pycache__/
 .DS_Store
 Icon?
 .venv/
+# ---- local deploy ledger (production-engineer) — NEVER commit ----
+/.deploy/
