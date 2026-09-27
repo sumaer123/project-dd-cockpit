@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project DD — Territory Cockpit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=20260924b">
+</head>
+<body>
+<header>
+  <div class="logo">
+    <svg width="28" height="28" viewBox="0 0 32 32" aria-label="Databricks">
+      <path fill="#FF3621" d="M16 1.5 2.2 8.9v3.3L16 19.6l11.4-6.1v3L16 22.6 2.2 15.2v3.3L16 25.9l13.8-7.4v-3.3l-1.6-.86L16 17.6 4.6 11.5v-.05L16 5.4l13.8 7.4V9.5L16 1.5Z"/>
+      <path fill="#FF3621" d="M16 22.6 4.6 16.5v.95L16 23.6l11.4-6.1v3.05L16 27.6 2.2 20.2v3.3L16 30.9l13.8-7.4v-6.6l-1.6-.86L16 22.6Z"/>
+    </svg>
+    <span class="wm">databricks</span>
+  </div>
+  <div class="title-block"><span class="t">Project DD</span><span class="s" id="terrLabel">Territory Cockpit</span></div>
+  <div class="header-spacer"></div>
+  <button class="refresh-btn" id="refreshBtn" title="Pull the latest data now (same job as the scheduled daily refresh)">&#8635; Refresh now</button>
+  <div class="asof" id="asof"></div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="content">
+    <div class="topbar" id="topbar"></div>
+    <main id="view"></main>
+    <footer id="footer"></footer>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<!-- OPTIONAL feeds (both git-ignored; a missing file is fine):
+     rob_content.js  — your hand-curated weekly-review narrative (copy rob_content.example.js)
+     hygiene_data.js — Salesforce-hygiene scores from a separate add-on (not in this kit) -->
+<script src="rob_content.js"></script>
+<script src="hygiene_data.js"></script>
+<script src="app.js?v=20260924b"></script>
+</body>
+</html>

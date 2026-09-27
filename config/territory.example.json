@@ -1,0 +1,40 @@
+{
+  "_comment": "Do not hand-write this file — run `python3 setup/configure.py`, which discovers your role and team from Salesforce and writes config/territory.json in this shape.",
+  "manager": {
+    "name": "Your Name",
+    "sfdc_username": "you@databricks.com",
+    "sfdc_user_id": "005XXXXXXXXXXXXXXX",
+    "title": "Director, Enterprise",
+    "role": "Your SFDC role name"
+  },
+  "reviewer": { "name": "Your Manager", "sfdc_user_id": "005XXXXXXXXXXXXXXX" },
+  "territory_label": "Shown in the app header",
+  "aes": [
+    {
+      "name": "AE Full Name",
+      "sfdc_user_id": "005XXXXXXXXXXXXXXX",
+      "email": "ae@databricks.com",
+      "title": "Account Executive",
+      "role": "",
+      "accounts_owned": 20,
+      "slack_user_id": "",
+      "include": true
+    }
+  ],
+  "salesforce": { "instance_url": "https://databricks.my.salesforce.com/" },
+  "databricks_data": {
+    "profile": "logfood",
+    "host": "https://<data-workspace-host>",
+    "warehouse_id": "<sql-warehouse-id>"
+  },
+  "databricks_cloud": {
+    "enabled": true,
+    "profile": "<cloud-profile-name>",
+    "host": "https://<your-app-workspace-host>",
+    "app_name": "dd-yourname-cockpit",
+    "workspace_source_dir": "project-dd",
+    "app_url": ""
+  },
+  "schedule": { "hour": 9, "minute": 0 },
+  "fiscal_year": null
+}

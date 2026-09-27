@@ -1,0 +1,32 @@
+# ---- your territory (ids, names) — NEVER commit ----
+config/territory.json
+config/territory.json.bak
+# ---- generated data: customer + consumption numbers — NEVER commit ----
+app/data.js
+app/hygiene_data.js
+app/rob_content.js
+cloud/data.js
+cloud/hygiene_data.js
+cloud/rob_content.js
+cloud/app.js
+cloud/index.html
+cloud/styles.css
+cloud/config.js
+cloud/.deploy/
+data/raw_*.json
+data/_staging_*/
+data/rob_snapshots/
+data/pipecov_history.json
+data/forecast.json
+data/insights.json
+data/q3_goals.json
+data/last_refresh.txt
+# ---- runtime / logs ----
+pipeline/*.log
+pipeline/*.log.*
+pipeline/.refresh*
+__pycache__/
+*.pyc
+.DS_Store
+Icon?
+.venv/
