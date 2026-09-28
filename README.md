@@ -5,10 +5,12 @@ Salesforce data (accounts, use cases, opportunities, ConsumptionPlan forecasts
 and quotas) and Databricks consumption data, builds one static web app, and
 optionally mirrors it as a read-only **Databricks App**.
 
+**Version:** 1.1.0 (see `VERSION`).
+
 - **No LLM and no tokens.** The whole pipeline is deterministic Python (stdlib only) plus the `sf` and `databricks` CLIs.
 - **No secrets in the repo.** Logins stay inside the `sf` and `databricks` CLIs (browser SSO / OAuth).
-- **No hard-coded people.** `setup/configure.py` reads *your* role and *your* team from Salesforce and writes `config/territory.json`, which is git-ignored. Every other file reads that config.
-- **No data in the repo.** Everything generated (raw pulls, `app/data.js`) is git-ignored.
+- **No hard-coded people.** `setup/configure.py` reads *your* role and *your* team from Salesforce and writes config/territory.json, which is git-ignored. Every other file reads that config. Every question has a flag; run `setup/configure.py --help` to see them.
+- **No data in the repo.** Everything generated (raw pulls, app/data.js) is git-ignored.
 
 ## Quick start (macOS)
 
@@ -52,4 +54,4 @@ config/     territory.example.json (schema). Your territory.json is written here
 - **Open:** double-click `Open Project DD.command`.
 - **Fresh data now:** double-click `Update Project DD.command`, or click **Refresh now** in the app.
 - **Daily:** the launchd job refreshes at the configured hour (default 09:00) and at login.
-- **Team changed?** Re-run `python3 setup/configure.py`.
+- **Team changed?** Re-run `setup/configure.py`.

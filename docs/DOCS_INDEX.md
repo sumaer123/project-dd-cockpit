@@ -26,21 +26,21 @@
 
 | Doc (path) | Purpose | Status | Last updated |
 |---|---|---|---|
-| `Project_DD_Setup_Guide.md` (external, internal only) | Step-by-step onboarding for a new territory manager (60–90 min, includes SFDC/Databricks logins). Kept internal only — contains workspace URLs, workspace IDs, and schema names. | REFERENCE | 2026-09-27 (verified) |
+| `Project_DD_Setup_Guide.md` (external, internal only) | Step-by-step onboarding for a new territory manager (60–90 min, includes SFDC/Databricks logins). Internal setup guide, shared privately, deliberately kept outside this repo. | REFERENCE | 2026-09-27 (verified) ⚠ MISSING |
 
 ---
 
 ## Setup & Installation
 
-**Primary guide:** `Project_DD_Setup_Guide.md` (internal only) — step-by-step onboarding for a new territory manager (60–90 min, includes all logins and configuration). Kept **internal only** — contains workspace URLs, workspace IDs, and schema names.
+**Primary guide:** `Project_DD_Setup_Guide.md` (internal setup guide, shared privately, deliberately kept outside this repo) — step-by-step onboarding for a new territory manager (60–90 min, includes all logins and configuration).
 
-**Public repo:** [github.com/sumaer123/project-dd-cockpit](https://github.com/sumaer123/project-dd-cockpit) (code only, no data/names/IDs; all config lives in `config/territory.json`, git-ignored).
+**Public repo:** [github.com/sumaer123/project-dd-cockpit](https://github.com/sumaer123/project-dd-cockpit) (code only, no data/names/IDs; all config lives in config/territory.json, git-ignored).
 
 ---
 
 ## What's Different from Project DD
 
-- **Configuration-driven:** Territory specifics (people, AE roster, account map, manager info) live in `config/territory.json` (git-ignored, created on setup), written by `setup/configure.py` from the installing manager's SFDC User record and role.
+- **Configuration-driven:** Territory specifics (people, AE roster, account map, manager info) live in config/territory.json (git-ignored, created on setup), written by `setup/configure.py` from the installing manager's SFDC User record and role.
 - **Self-contained launchd:** `setup/install_schedule.py` generates the daily refresh schedule; fiscal year is computed from the date.
 - **Optional modules:**
   - BABA deep-dive (now optional via `DD_DEEPDIVE_URL` env var; omit if not needed).
@@ -48,7 +48,7 @@
   - Hygiene module (hidden when `hygiene_data.js` is absent).
   - RoB narrative (optional via `app/rob_content.js`, git-ignored; can be provided externally or copied from `app/rob_content.example.js`).
 - **Cloud app creation:** `setup/create_cloud_app.py` automates first Databricks App create + deploy (run once).
-- **Verification:** Every build runs `ddmodules.py` (11 checks, all or nothing) to confirm each module has data.
+- **Verification:** Every build runs `pipeline/ddmodules.py` (12 checks, all reported; MISSING/EMPTY verdicts halt the build). Checks include "Consumption visibility" (cross-check that paying accounts have consumption data).
 
 ---
 
@@ -57,13 +57,13 @@
 | Path | Purpose |
 |---|---|
 | `setup/bootstrap.sh` | One-command orchestrator (safe to re-run). |
-| `setup/configure.py` | Interactive config builder — logs into SFDC, finds your reports, confirms AEs, checks Databricks. Outputs `config/territory.json` (git-ignored, created on setup). |
+| `setup/configure.py` | Interactive config builder — logs into SFDC, finds your reports, confirms AEs, checks Databricks. Outputs config/territory.json (git-ignored, created on setup). |
 | `setup/install_schedule.py` | Installs launchd for daily refresh. |
 | `setup/create_cloud_app.py` | Creates Databricks App, runs first deploy (one time only). |
 | `pipeline/refresh.py` | Nightly data pull: SFDC + Databricks in parallel, build, verify, publish. |
-| `pipeline/ddconfig.py` | Loads `config/territory.json` (git-ignored); no other file hard-codes names/IDs/workspace. |
+| `pipeline/ddconfig.py` | Loads config/territory.json (git-ignored); no other file hard-codes names/IDs/workspace. |
 | `pipeline/ddcore.py` | Login checks, typed errors, retries, locking, progress. |
-| `pipeline/ddmodules.py` | Post-build verification (11 checks per module). |
+| `pipeline/ddmodules.py` | Post-build verification (12 checks: app modules, consumption feeds, next-steps capture). |
 | `app/` | Frontend (same as Project DD, reused). |
 | `cloud/` | Databricks App code (mirrors local app). |
 
@@ -79,8 +79,11 @@
 
 | Date | Event | Docs touched | By |
 |---|---|---|---|
-| 2026-09-27 (deploy finalize) | **Onboarding finalize: Project DD Kit published.** New public GitHub repo [sumaer123/project-dd-cockpit](https://github.com/sumaer123/project-dd-cockpit) (code only, no data) — config-driven, scrubbed copy of Project DD for sales managers to self-install. Territory cockpit with SFDC + Databricks nightly refresh; local web app + Databricks App cloud mirror. All configuration & secrets stay local in `config/territory.json` (git-ignored, created on setup). Setup guide (internal, contains workspace URLs/IDs) at `Project_DD_Setup_Guide.md` (not in public repo). Onboarding docs created: Part A indexing, REBUILD_SPEC (configuration + build procedures), STATUS (deployment info). Registry entry added. Project DD docs updated with cross-reference noting the public kit and open account-nav bug. User-facing: NO (code repo only). | DOCS_INDEX.md (Part A indexing + Part B created), REBUILD_SPEC.md (created), STATUS.md (created) | documentation-engineer (deploy finalize) |
+| 2026-09-27 (deploy finalize) | **Onboarding finalize: Project DD Kit published.** New public GitHub repo [sumaer123/project-dd-cockpit](https://github.com/sumaer123/project-dd-cockpit) (code only, no data) — config-driven, scrubbed copy of Project DD for sales managers to self-install. Territory cockpit with SFDC + Databricks nightly refresh; local web app + Databricks App cloud mirror. All configuration & secrets stay local in config/territory.json (git-ignored, created on setup). Setup guide (internal, contains workspace URLs/IDs) at `Project_DD_Setup_Guide.md` (not in public repo). Onboarding docs created: Part A indexing, REBUILD_SPEC (configuration + build procedures), STATUS (deployment info). Registry entry added. Project DD docs updated with cross-reference noting the public kit and open account-nav bug. User-facing: NO (code repo only). | DOCS_INDEX.md (Part A indexing + Part B created), REBUILD_SPEC.md (created), STATUS.md (created) | documentation-engineer (deploy finalize) |
 - **2026-09-27** — docs git-sync — main @ `6401b57` — files: `docs/DOCS_INDEX.md`, `docs/REBUILD_SPEC.md`, `docs/STATUS.md` — by: documentation-engineer
 - **2026-09-27 (push)** — `main` `4d0bb17`→`6401b57` (1 commit) · docs: Protocol F finalize: Onboard project-dd-kit documentation (DOCS_INDEX, REBUILD_SPEC, — by: git
 - **2026-09-27 (deploy finalize)** — commit `7e6691e` · Removed AE first name from a code comment in app.js and gitignored the local .deploy/ ledger dir so it can never land in the public repo. User-facing: NO. — docs touched: docs/DOCS_INDEX.md — by: documentation-engineer (deploy finalize)
 - **2026-09-27** — docs git-sync — main @ `87fbc3c` — files: `docs/DOCS_INDEX.md` — by: documentation-engineer
+- **2026-09-27** — docs git-sync — main @ `4eed2a0` — files: `docs/DOCS_INDEX.md` — by: documentation-engineer
+- **2026-09-28 (push)** — `main` `4eed2a0`→`91c197c` (1 commit) · Kit 1.1.0: a colleague can finish setup on a fresh Mac — by: git
+- **2026-09-28 (deploy finalize)** — commit `91c197cc9bb52181133fa6f4a4eb0095678a1c03` · Kit 1.1.0: non-interactive configure (a flag per prompt), live SFDC/logfood access probes, gtm_gold catalog auto-detect, consumption-visibility guard, timezone-correct refresh stamps, and app footer/goals-file fixes -- so a colleague can finish setup on a fresh Mac. User-facing: YES. — docs touched: docs/DOCS_INDEX.md — by: documentation-engineer (deploy finalize)

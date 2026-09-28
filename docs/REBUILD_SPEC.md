@@ -4,23 +4,50 @@
 
 ## Configuration
 
-### Primary config: `config/territory.json` (git-ignored, auto-generated)
+### Primary config: config/territory.json (git-ignored, auto-generated)
 
 Generated once by `setup/configure.py`. Structure:
 
 ```json
 {
-  "user_id": "user ID from Salesforce",
-  "user_name": "manager name",
-  "user_email": "manager's Salesforce email",
-  "manager_id": "manager's ManagerId (for depth-2 reports discovery)",
-  "sfdc_instance": "https://databricks.my.salesforce.com",
-  "dbx_workspace": "workspace URL",
-  "dbx_warehouse": "warehouse ID",
-  "dbx_catalog": "uc_prod_gold (or other Unity Catalog)",
-  "dbx_schema": "gtm_gold",
-  "ae_list": [{ "id": "AE SFDC user ID", "name": "AE name", "email": "AE email" }],
-  "reviewed_by": "manager name"
+  "manager": {
+    "name": "Your Name",
+    "sfdc_username": "you@databricks.com",
+    "sfdc_user_id": "005...",
+    "title": "Director, Enterprise",
+    "role": "Your SFDC role name"
+  },
+  "reviewer": { "name": "Your Manager", "sfdc_user_id": "005..." },
+  "territory_label": "Shown in the app header",
+  "aes": [
+    {
+      "name": "AE Full Name",
+      "sfdc_user_id": "005...",
+      "email": "ae@databricks.com",
+      "title": "Account Executive",
+      "role": "",
+      "accounts_owned": 20,
+      "slack_user_id": "",
+      "include": true
+    }
+  ],
+  "salesforce": { "instance_url": "https://databricks.my.salesforce.com/" },
+  "databricks_data": {
+    "profile": "logfood",
+    "host": "https://<data-workspace-host>",
+    "warehouse_id": "<sql-warehouse-id>",
+    "catalog": "main"
+  },
+  "databricks_cloud": {
+    "enabled": true,
+    "profile": "<cloud-profile-name>",
+    "host": "https://<your-app-workspace-host>",
+    "app_name": "dd-yourname-cockpit",
+    "workspace_source_dir": "project-dd",
+    "app_url": ""
+  },
+  "schedule": { "hour": 9, "minute": 0 },
+  "fiscal_year": null
 }
 ```
 
@@ -29,79 +56,68 @@ Generated once by `setup/configure.py`. Structure:
 
 ---
 
-## Environment Variables (Optional)
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `DD_DEEPDIVE_URL` | (unset) | If set, embeds BABA deep-dive iframe at this URL. Omit for kit-only install. |
-| `DD_NXT_PUSH` | 1 | Set to 0 to skip DobbyNXT push after refresh (if integrated). |
-
----
-
 ## Build & Refresh
 
 ### `pipeline/refresh.py`
 
-Runs nightly (via launchd, installed by `setup/install_schedule.py`).
+Runs daily at the configured hour (default 09:00) and at login (via launchd, installed by `setup/install_schedule.py`).
 
-1. **Auth checks:** Validates `~/.config/databricks/profiles.json` and Salesforce CLI tokens.
+1. **Auth checks:** Probes the Salesforce session (`sf org display`), the Databricks data profile (`databricks current-user me`) and, if enabled, the cloud profile (non-fatal). The CLIs keep their own logins; the kit stores no tokens.
 2. **Parallel pulls:** SFDC (`sf soql`) + Databricks (`databricks sql`).
-3. **Build:** Merges data into `data/data.js` and `cloud/` mirror.
-4. **Verify:** `ddmodules.py` runs 11 module checks (all or nothing).
-5. **Publish:** Uploads to Databricks App (if configured) via `cloud/deploy.sh`.
+3. **Build:** `data/build_data.py` turns the raw pulls into `app/data.js`; the cloud publish later copies `app/` into `cloud/`.
+4. **Verify:** `pipeline/ddmodules.py` runs 12 module checks, reporting results (OK / STALE / EMPTY / MISSING).
+5. **Publish:** Uploads to Databricks App (if configured) via `cloud/deploy_cloud.py`.
 
-### Verification checklist: `ddmodules.py`
+### Verification checklist: `pipeline/ddmodules.py`
 
-Every module must have data. Checks are named and halt the build on failure:
+Every module is checked and results reported. Only MISSING and EMPTY verdicts halt the build:
 
-- consumption_territory (run-rate, product mix)
-- quarter_scorecard (AE growth)
-- opportunities (pipeline)
-- new_pipeline (stage progressions)
-- pipeline_coverage (per-AE vs target)
-- rob (top 10 go-lives)
-- partner_exposure (SIs and partners)
-- config_ae_list (AE roster matches expected count)
-- config_accounts (primary accounts loaded)
-- config_use_cases (open UCOs present)
-- forest_data (ultimate-parent hierarchy, if present)
+- Territory (run-rate, product mix, account list)
+- Quarter Scorecard (AE growth, Q-over-Q bands)
+- Opportunities (open pipeline and closed-won book)
+- New Pipeline (weekly stage progressions)
+- Pipeline Coverage (per-AE pipe vs target)
+- RoB — Weekly Review (top go-lives, Friday snap)
+- Partner Exposure (SIs and partners named)
+- Consumption forecast (current-quarter live forecasts from Salesforce)
+- My forecast (manager's own submitted forecast)
+- Consumption visibility (row-filter verification: accounts with ARR have consumption data)
+- UCO next steps (coverage of next-step capture)
+- Opp next steps (coverage of opportunity next-steps)
 
-Failure message shows which check failed and a context line.
+Failure details show the check name and context.
 
 ---
 
 ## Local Launchd Schedule
 
-Generated by `setup/install_schedule.py` at `~/Library/LaunchAgents/com.projectdd.refresh.plist`:
+Generated by `setup/install_schedule.py` at `~/Library/LaunchAgents/com.projectdd.<user>.refresh.plist`:
 
 ```xml
 <plist>
   <dict>
     <key>Label</key>
-    <string>com.projectdd.refresh</string>
+    <string>com.projectdd.<user>.refresh</string>
     <key>ProgramArguments</key>
     <array>
       <string>/path/to/project-dd-kit/pipeline/refresh.py</string>
     </array>
     <key>StartCalendarInterval</key>
-    <array>
-      <dict>
-        <key>Hour</key>
-        <integer>6</integer>
-        <key>Minute</key>
-        <integer>0</integer>
-        <key>Weekday</key>
-        <integer>1</integer>  <!-- Monday–Friday (1–5) -->
-      </dict>
-      <!-- repeat for Tue–Fri -->
-    </array>
+    <dict>
+      <key>Hour</key>
+      <integer>9</integer>
+      <key>Minute</key>
+      <integer>0</integer>
+    </dict>
+    <key>RunAtLoad</key>
+    <true/>
   </dict>
 </plist>
 ```
 
-- **Run time:** 6:00 AM IST (configurable in `install_schedule.py`).
-- **Days:** Monday–Friday (weekends off).
-- **Manual trigger:** Run `pipeline/refresh.py` directly anytime.
+- **Run time:** Daily at the configured hour (default 09:00, local time). To change it, edit `schedule` in `config/territory.json` and re-run `setup/install_schedule.py`. There is no --schedule flag.
+- **Trigger at login:** Yes, `RunAtLoad` = true.
+- **Manual trigger:** Run `pipeline/refresh.py` directly anytime, or click **Refresh now** in the app.
 
 ---
 
@@ -109,20 +125,20 @@ Generated by `setup/install_schedule.py` at `~/Library/LaunchAgents/com.projectd
 
 ### Setup: `setup/create_cloud_app.py`
 
-Runs once to:
+Runs once to create a Databricks App in your workspace. It:
 
-1. Create a new Databricks App in your workspace named "Project DD" (or configurable).
-2. Generate initial `cloud/manifest.yml` with workspace + catalog + schema.
-3. Deploy to Databricks via `databricks apps create` + `databricks apps update`.
+1. Prompts for the workspace and app name (or uses saved settings).
+2. Creates the app via `databricks apps create` + initial deploy.
+3. Stores the app URL in config/territory.json for the refresh pipeline.
 
 ### Updates
 
-After every successful `pipeline/refresh.py`, the cloud app auto-updates with new data via `cloud/deploy.sh`.
+After every successful `pipeline/refresh.py`, `cloud/build_cloud.py` → `databricks sync` → `cloud/deploy_cloud.py` uploads fresh data to the cloud app.
 
 ### Access
 
-Read-only app shared via workspace URL. Data is always 1 refresh cycle behind the local app.
+Read-only app shared via workspace URL. Data is the same freshness as the local app (updated after each refresh).
 
 ---
 
-**Last updated:** 2026-09-27
+**Last updated:** 2026-09-28
