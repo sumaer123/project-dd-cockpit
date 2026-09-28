@@ -18,7 +18,7 @@
 # NOT for launchd. The scheduled job calls refresh.py directly, without --auth, so an
 # unattended run never pops a browser window — it fails honestly instead.
 set -uo pipefail
-export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.local/sf/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PY="$(command -v python3)"
 # Cloud settings come from config/territory.json (via ddconfig.py).

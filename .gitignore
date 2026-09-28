@@ -20,6 +20,7 @@ data/pipecov_history.json
 data/forecast.json
 data/insights.json
 data/q3_goals.json
+data/quarter_goals.json
 data/last_refresh.txt
 # ---- runtime / logs ----
 pipeline/*.log

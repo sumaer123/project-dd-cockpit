@@ -67,6 +67,8 @@ _dd = CFG.get("databricks_data") or {}
 DBX_PROFILE = _dd.get("profile") or "logfood"
 DBX_DATA_HOST = _dd.get("host") or ""
 WAREHOUSE = _dd.get("warehouse_id") or ""
+# catalog that holds gtm_gold (configure.py detects it); "" = the workspace default catalog
+DBX_CATALOG = (_dd.get("catalog") or "").strip()
 
 # ---- Databricks: the CLOUD workspace (hosts the read-only Databricks App) --
 _dc = CFG.get("databricks_cloud") or {}
@@ -127,6 +129,7 @@ if __name__ == "__main__":
     print(f"manager: {MANAGER_NAME} <{SF_USERNAME}> ({MANAGER_ID}) · reviewer: {REVIEWER_NAME}")
     print(f"territory: {TERRITORY_LABEL}")
     print(f"AEs ({len(AES)}): " + ", ".join(AE_ORDER))
-    print(f"data: profile={DBX_PROFILE} warehouse={WAREHOUSE or '<missing>'}")
+    print(f"data: profile={DBX_PROFILE} warehouse={WAREHOUSE or '<missing>'} "
+          f"catalog={DBX_CATALOG or '(workspace default)'}")
     print(f"cloud: enabled={CLOUD_ENABLED} profile={DBX_CLOUD_PROFILE or '-'} app={CLOUD_APP_NAME or '-'}")
     print(f"fiscal: {FY_LABEL} (start {FY_START}) · quarters {ACTIVITY_QUARTERS}")

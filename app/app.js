@@ -316,7 +316,7 @@ function accountForecastTable(q,accts){
     <th class="num">Days Left</th><th class="num">GTTB</th><th class="num">Forecast</th><th class="num">Fcst − GTTB</th>
     <th class="num">QoQ (GTTB)</th><th class="num">QoQ (Fcst)</th></tr></thead>
     <tbody>${rows.map(row).join('')}${row(total)}</tbody></table>
-    <div class="tiny muted" style="margin-top:8px">Forecast by account — default = GTTB (live), <b>click to edit</b>. Base = prior quarter's actual (closed) or GTTB (Q3 base = Q2 GTTB).</div></div>`;}
+    <div class="tiny muted" style="margin-top:8px">Forecast by account — default = GTTB (live), <b>click to edit</b>. Base = prior quarter's actual once it has closed, otherwise its GTTB (so next quarter's base is this quarter's GTTB).</div></div>`;}
 
 /* ---- open U3+ pipeline ---- */
 function u3PipelineBox(list,aeCtx){
@@ -1896,7 +1896,7 @@ function robDiffBox(wk){
     <div class="rob-diff-cols">${grp('✚ Added','add',d.added)}${grp('◔ Moved / progressed','move',d.moved)}${grp('✕ Slipped / removed','rem',d.removed)}</div>`;}
 function robGoals(){
   const g=ROB.q3goals||{},tm=g.teamMandates||[],ppl=g.people||[];
-  if(!tm.length&&!ppl.length)return '<div class="muted tiny">No quarter goals captured yet — add data/q3_goals.json (see the setup guide).</div>';
+  if(!tm.length&&!ppl.length)return '<div class="muted tiny">No quarter goals captured yet — add data/quarter_goals.json (see the setup guide).</div>';
   const mand=tm.length?`<div class="rob-goals-grid">${tm.map((m,i)=>`<div class="rob-goal-col"><div class="rob-goal-num">${i+1}</div><div class="rob-goal-t">${esc(m.title)}</div>${m.measurable?`<div class="rob-goal-m">◎ ${esc(m.measurable)}</div>`:''}${m.detail?`<div class="rob-goal-d">${esc(m.detail)}</div>`:''}${m.owner?`<div class="rob-goal-o">${esc(m.owner)}</div>`:''}</div>`).join('')}</div>`:'';
   const people=ppl.length?`<details class="rob-goals-ppl"><summary>Per-AE goals (${ppl.length})</summary>${ppl.map(p=>`<div class="rob-ppl"><div class="rob-ppl-n">${esc(p.name)}${p.patch?` <span class="muted">· ${esc(p.patch)}</span>`:''}</div><ul>${(p.goals||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</details>`:'';
   return mand+people;}
@@ -2200,7 +2200,7 @@ function renderTopbar(){
   const wkOpts=`<option value="all">${isAll?'Full year':'Full quarter'}</option>`+weeks.map(w=>`<option value="${w.id}" ${state.week===w.id?'selected':''}>${w.range}${w.state==='current'?' • current':''}</option>`).join('');
   const oppChips=`<div class="qsel"><label>Forecast</label><div class="seg">${OPP_CATS.map(c=>`<button class="${state.oppFilter===c?'on':''}" data-oppf="${esc(c)}">${c==='All'?'All open':c}</button>`).join('')}</div></div>`;
   tb.innerHTML=`<div class="crumb">${crumb}</div><div class="topbar-spacer"></div>
-    ${partners?'<span class="score-fixed-note">Partner / SI mentions across the open book · text-derived, every row sourced</span>':rob?'<span class="score-fixed-note">Weekly · current quarter + next</span>':hyg?'<span class="score-fixed-note">Salesforce hygiene · the whole open book, not period-scoped</span>':pc?'<span class="score-fixed-note">Current + next quarter · pipe vs required</span>':score?'<span class="score-fixed-note">FY&#39;27 Q3 · target 15–20% QoQ</span>':`<div class="qsel"><label>Period</label><div class="seg">${qbtns}</div></div>
+    ${partners?'<span class="score-fixed-note">Partner / SI mentions across the open book · text-derived, every row sourced</span>':rob?'<span class="score-fixed-note">Weekly · current quarter + next</span>':hyg?'<span class="score-fixed-note">Salesforce hygiene · the whole open book, not period-scoped</span>':pc?'<span class="score-fixed-note">Current + next quarter · pipe vs required</span>':score?'<span class="score-fixed-note">'+esc(CURQ)+' · target 15–20% QoQ</span>':`<div class="qsel"><label>Period</label><div class="seg">${qbtns}</div></div>
     ${opps?oppChips:newpipe?'':`<div class="qsel"><label>Week</label><select class="wkselect" ${isAll?'disabled':''}>${wkOpts}</select></div>`}`}`;
   tb.querySelectorAll('[data-nav]').forEach(el=>el.onclick=()=>navTo(el.dataset.nav));
   tb.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{state.q=QLABEL[b.dataset.q];state.week='all';render();});

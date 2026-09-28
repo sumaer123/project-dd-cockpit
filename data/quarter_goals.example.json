@@ -1,5 +1,5 @@
 {
-  "_comment": "OPTIONAL. Copy to data/q3_goals.json (git-ignored) to show your quarter goals in the RoB review module. Rebuilt into data.js on the next refresh.",
+  "_comment": "OPTIONAL. Copy to data/quarter_goals.json (git-ignored) to show your quarter goals in the RoB review module. Rebuilt into data.js on the next refresh.",
   "teamMandates": [
     { "title": "Grow consumption 15% QoQ", "measurable": "Territory GTTB >= target", "detail": "Why this matters and how." },
     { "title": "Land 10 new use cases at U3+", "measurable": "10 UCs", "detail": "" }

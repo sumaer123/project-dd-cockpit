@@ -101,7 +101,9 @@ HINTS = {
     BUILD: "Data pulled fine but build_data.py failed. data.js is unchanged.",
     LOCKED: "A refresh is already running (button or 09:00 launchd job). Wait "
             "for it to finish.",
-    CLI_MISSING: "The sf or databricks CLI is not on PATH for this process.",
+    CLI_MISSING: "The sf or databricks CLI is not on PATH for this process. If you "
+                 "installed or moved either one, re-run `python3 setup/install_schedule.py` "
+                 "so the daily job picks up the new location.",
     INTERNAL: "Unclassified failure — see pipeline/refresh.log for the raw error.",
 }
 

@@ -71,6 +71,9 @@ FY = cfg.FY_START   # current Databricks fiscal year start — window for UC act
 OWNER_IDS = cfg.OWNER_IDS
 # The manager's OWN Salesforce user id — for their Manager Forecast rollup (see "CP mgr forecast").
 MANAGER_ID = cfg.MANAGER_ID
+# Catalog that holds gtm_gold (configure.py detects it; on logfood it is `main`).
+# Empty = the workspace default catalog, which is what older configs relied on.
+CATALOG = cfg.DBX_CATALOG
 PRIOR_FY_NUM, CUR_FY_NUM = cfg.PRIOR_FY, cfg.FISCAL_YEAR
 
 
@@ -90,6 +93,8 @@ def sf_query(org, soql, out):
 def dbx_sql(stmt):
     payload = {"warehouse_id": WAREHOUSE, "statement": stmt, "wait_timeout": "50s",
                "disposition": "INLINE", "format": "JSON_ARRAY"}
+    if CATALOG:
+        payload["catalog"] = CATALOG
     res = dd.dbx_json(["databricks", "api", "post", "/api/2.0/sql/statements",
                        "--profile", DBX_PROFILE, "--json", json.dumps(payload)],
                       timeout=300, ctx="DBX statement submit")
@@ -353,7 +358,7 @@ def main():
                 f"FROM gtm_gold.account_consumption_daily WHERE account_id IN {ids_dbx} "
                 f"AND fiscal_year IN ({PRIOR_FY_NUM}, {CUR_FY_NUM}) GROUP BY account_id, fiscal_year_quarter",
                 "raw_consumption_quarterly.json")),
-            "FY27 product rows": (_dbx, (
+            f"{cfg.FY_LABEL} product rows": (_dbx, (
                 prod_stmt(f"usage_date >= '{FY}'"), "raw_products.json")),
             "T28D product rows": (_dbx, (
                 prod_stmt(f"usage_date >= date_sub((SELECT MAX(usage_date) "
@@ -391,8 +396,8 @@ def main():
             shutil.move(os.path.join(tmp, fn), os.path.join(DATA, fn))
         log("  raw files promoted")
 
-        # stamp the successful-refresh time (12h IST) so the app can show "Last refresh"
-        stamp = datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p IST")
+        # stamp the successful-refresh time (12h, in this Mac's time zone) for "Last refresh"
+        stamp = datetime.datetime.now().astimezone().strftime("%Y-%m-%d %I:%M %p %Z")
         with open(os.path.join(DATA, "last_refresh.txt"), "w") as f: f.write(stamp)
 
         dd.progress("Rebuilding data.js", 92)

@@ -87,7 +87,10 @@ def main():
         with open(p, "w") as f:
             f.write(json.dumps(c, indent=2, ensure_ascii=False) + "\n")
     print(f"\n✓ cloud mirror live: {url or '(see Compute › Apps in the workspace)'}")
-    print("  Share it: workspace › Compute › Apps › " + name + " › Permissions › add users (Can use).")
+    print("  Share it: workspace › Compute › Apps › " + name + " › Permissions › add users (Can use),")
+    print(f"  or: databricks apps update-permissions {name} --profile {prof} --json "
+          "'{\"access_control_list\":[{\"user_name\":\"someone@databricks.com\","
+          "\"permission_level\":\"CAN_USE\"}]}'")
 
 
 if __name__ == "__main__":

@@ -245,6 +245,54 @@ def _parse_iso(ts):
     return None
 
 
+# gtm_gold's consumption tables carry an account-level row filter. Outside the
+# bypass Opal group
+# (datasets.main.gtm_data.read) a user sees only the accounts in their own book, and
+# the query still SUCCEEDS: no error, just missing rows. Every other check would
+# pass, because accounts, use cases and opportunities come from Salesforce. So
+# cross-check the two sources: an account Salesforce says has ARR should have
+# consumption rows in the trailing year. With full access that holds for every such
+# account, so a gap means the row filter (or a broken pull), not noise.
+VIS_OK_PCT = 90.0
+
+
+def _visibility_row():
+    label = "Consumption visibility"
+    data_dir = os.path.join(ROOT, "data")
+    try:
+        with open(os.path.join(data_dir, "raw_accounts.json")) as f:
+            accs = (json.load(f).get("result") or {}).get("records") or []
+        with open(os.path.join(data_dir, "raw_daily.json")) as f:
+            daily = (json.load(f).get("result") or {}).get("data_array") or []
+    except Exception as e:  # noqa: BLE001 — report, never raise
+        return {"label": label, "verdict": MISSING, "n": 0,
+                "note": f"raw account/consumption files unreadable ({type(e).__name__})"}
+
+    def _num(v):
+        try:
+            return float(v or 0)
+        except (TypeError, ValueError):
+            return 0.0
+
+    seen = {r[0] for r in daily if r}
+    paying = [a for a in accs if _num(a.get("ARR__c")) > 0 or _num(a.get("T3M_ARR__c")) > 0]
+    if not paying:
+        return {"label": label, "verdict": OK, "n": len(seen),
+                "note": "no account with Salesforce ARR to cross-check"}
+    hidden = sorted(a.get("Name") or a.get("Id") or "?" for a in paying if a.get("Id") not in seen)
+    got = len(paying) - len(hidden)
+    pct = 100.0 * got / len(paying)
+    note = f"{got}/{len(paying)} accounts with Salesforce ARR show consumption ({pct:.0f}%)"
+    fix = (" — the gtm_gold row filter is hiding accounts: request datasets.main.gtm_data.read"
+           " in Opal (setup guide, access checklist), then refresh")
+    if got == 0:
+        return {"label": label, "verdict": EMPTY, "n": 0, "note": note + fix}
+    if pct < VIS_OK_PCT:
+        return {"label": label, "verdict": STALE, "n": got,
+                "note": note + fix + "; e.g. " + ", ".join(hidden[:3])}
+    return {"label": label, "verdict": OK, "n": got, "note": note}
+
+
 def verify(data=_LOAD, hyg=_LOAD):
     """Check every app module. Returns (rows, summary) — never raises.
 
@@ -291,6 +339,8 @@ def verify(data=_LOAD, hyg=_LOAD):
     rows.append(_cp_row(data))
     # the manager's OWN submitted Manager Forecast for the current quarter
     rows.append(_mgr_fc_row(data))
+    # can we see consumption for the accounts Salesforce says are paying? (row filter)
+    rows.append(_visibility_row())
 
     # next-steps capture coverage
     if data is not None:

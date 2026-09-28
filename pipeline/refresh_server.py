@@ -43,7 +43,9 @@ PYTHON = os.environ.get("DD_PYTHON", sys.executable)
 # refresh.py shells out to the sf / databricks CLIs — give it the same minimal PATH
 # launchd uses so the CLIs resolve regardless of how this server was started.
 ENV = dict(os.environ)
-ENV["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:" + ENV.get("PATH", "")
+ENV["PATH"] = ":".join([os.path.expanduser("~/.local/bin"), os.path.expanduser("~/.local/sf/bin"),
+                        "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+                        ENV.get("PATH", "")])
 ENV.setdefault("HOME", os.path.expanduser("~"))
 
 # Two guards, deliberately: this one rejects a second click in THIS process; the

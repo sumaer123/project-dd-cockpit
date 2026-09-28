@@ -25,7 +25,8 @@
   "databricks_data": {
     "profile": "logfood",
     "host": "https://<data-workspace-host>",
-    "warehouse_id": "<sql-warehouse-id>"
+    "warehouse_id": "<sql-warehouse-id>",
+    "catalog": "main"
   },
   "databricks_cloud": {
     "enabled": true,

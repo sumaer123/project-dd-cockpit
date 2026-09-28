@@ -562,8 +562,11 @@ for _fn in sorted(os.listdir(_rob_dir)):
         try: rob_snapshots[_fn[:-5]]=json.load(open(os.path.join(_rob_dir,_fn)))
         except Exception: pass
 rob_q3goals={}
-_gp=os.path.join(HERE,"q3_goals.json")   # optional: {goals:[...]} typed by the manager
-if os.path.exists(_gp):
+# optional quarter goals typed by the manager: data/quarter_goals.json
+# (data/q3_goals.json is the older name and is still read)
+_gp=next((p for p in (os.path.join(HERE,"quarter_goals.json"),os.path.join(HERE,"q3_goals.json"))
+          if os.path.exists(p)),"")
+if _gp:
     try: rob_q3goals=json.load(open(_gp))
     except Exception: rob_q3goals={}
 rob={"curFriday":rob_cur_friday,"fridays":_rob_fridays,"curQ":rob_cur,"nextQ":rob_next,
@@ -765,7 +768,7 @@ except Exception as _e:
 
 data={
     "meta":{
-        "generated":datetime.datetime.now().strftime("%Y-%m-%d %H:%M IST"),
+        "generated":datetime.datetime.now().astimezone().strftime("%Y-%m-%d %H:%M %Z"),
         "lastRefresh":last_refresh,
         "asOf":as_of.isoformat(),"curFQ":cur_label,"prevFQ":prev_label,
         "daysLeft":days_left,"quarterEnd":QBOUNDS[cur_label][1],"latestMoLabel":lm_label,
@@ -775,7 +778,7 @@ data={
         "cloudAppUrl":cfg.CLOUD_APP_URL,
         "openDef":"Open use cases = Stages U1–U5 (excludes U6/Live & closed).",
         "metricDef":"T7D/T28D = trailing 7/28-day avg daily $DBU. GTTB = QTD + T7D×days-left. QoQ = metric/Q1Base−1. Gap = metric/Q2Target.",
-        "sources":"UCs, opps, accounts: Salesforce (live). Consumption & products: gtm_gold.account_consumption_daily. Forecast inputs: forecast.json (manual). Targets: ConsumptionPlan.",
+        "sources":"UCs, opps, accounts: Salesforce (live). Consumption & products: gtm_gold.account_consumption_daily + sku_consumption_daily. Forecasts & targets: ConsumptionPlan (live; manual values only as a fallback).",
         "nAccounts":len(parents),"nUcos":len(ucos),
     },
     "qorder":QORDER,"aeOrder":AE_ORDER,"activityQuarters":ACTIVITY_QUARTERS,
